@@ -8,6 +8,6 @@ published source.
 ```
 nix-shell                       # pebble.nix pinned with npins (see shell.nix)
 pebble sdk install 4.9.169      # once; newer SDKs need pebble-tool >= 5.1
-pebble build                    # -> build/binary-watch.pbw (aplite basalt chalk diorite emery)
+pebble build                    # -> build/<directory-name>.pbw (aplite basalt chalk diorite emery)
 pebble install --emulator basalt
 ```

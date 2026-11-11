@@ -49,6 +49,17 @@ jobs:
           path: ~/.local/share/pebble-sdk
           key: pebble-sdk-4.9.169
 
+      - name: Build Pebble environment
+        if: steps.check.outputs.exists == 'false'
+        # python3.13-rsa's test suite is flaky (random keys; test_sign_different_key
+        # occasionally overflows), which fails the whole nix-shell build. Retry.
+        run: |
+          for attempt in 1 2 3; do
+            nix-shell --run true && exit 0
+            echo "::warning::nix-shell build failed (attempt $attempt), retrying"
+          done
+          exit 1
+
       - name: Build
         if: steps.check.outputs.exists == 'false'
         run: |
@@ -57,7 +68,7 @@ jobs:
             [ -e ~/.local/share/pebble-sdk/SDKs/4.9.169 ] || pebble sdk install 4.9.169
             pebble build
           '
-          test -f build/binary-watch.pbw
+          ls build/*.pbw
 
       - name: Publish release
         if: steps.check.outputs.exists == 'false'
@@ -65,8 +76,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: v${{ steps.version.outputs.version }}
         run: |
-          cp build/binary-watch.pbw "binary-watch-$TAG.pbw"
-          gh release create "$TAG" "binary-watch-$TAG.pbw" \
+          pbw=$(ls build/*.pbw | head -n1)
+          cp "$pbw" "binary-time-$TAG.pbw"
+          gh release create "$TAG" "binary-time-$TAG.pbw" \
             --target "$GITHUB_SHA" --title "$TAG" --generate-notes
 
       - name: Bump version on main
