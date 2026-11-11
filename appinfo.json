@@ -1,0 +1,122 @@
+{
+    "targetPlatforms": [
+        "aplite", 
+        "basalt", 
+        "chalk", 
+        "diorite", 
+        "emery"
+    ], 
+    "projectType": "native", 
+    "messageKeys": {
+        "TRUE_COLOR": 10010, 
+        "BLUETOOTH_VIBRATE": 10003, 
+        "TIME_DECO": 10028, 
+        "TRUE_BORDER": 10030, 
+        "DISPLAY_SECONDS": 10005, 
+        "DATE_TRUE_COLOR": 10018, 
+        "SHOW_DATE": 10021, 
+        "TIME_HINT": 10017, 
+        "FALSE_BORDER": 10031, 
+        "DATE_POS": 10022, 
+        "TIME_FORMAT": 10016, 
+        "FALSE_COLOR": 10011, 
+        "TIME_ALIGNMENT": 10015, 
+        "DATE_HINT": 10025, 
+        "TAPPING_EFFECT_TIMEOUT": 10007, 
+        "VIBRATE_HOURLY": 10004, 
+        "TRUE_BINARY": 10008, 
+        "BLUETOOTH_ICON": 10002, 
+        "HINT_COLOR": 10014, 
+        "DATE_FORMAT": 10024, 
+        "DATE_ALIGNMENT": 10023, 
+        "DISPLAY_IMPOSSIBLE": 10013, 
+        "DATE_HINT_COLOR": 10020, 
+        "BLUETOOTH_RECONNECT_VIBRATE": 10026, 
+        "QUICK_VIEW_MODE": 10033, 
+        "DATE_FALSE_COLOR": 10019, 
+        "NO_VIBE_CHARGING": 10027, 
+        "SHOW_SECONDS_INTERVAL": 10032, 
+        "BATTERY_ICON": 10000, 
+        "DATE_DECO": 10029, 
+        "BATTERY_VIBRATE": 10001, 
+        "READY": 10006, 
+        "DISPLAY_FALSE": 10012, 
+        "BACKGROUND_COLOR": 10009
+    }, 
+    "companyName": "lambda", 
+    "enableMultiJS": true, 
+    "versionLabel": "2.5", 
+    "longName": "Binary Time", 
+    "shortName": "Binary Time", 
+    "name": "Binary Time", 
+    "sdkVersion": "3", 
+    "displayName": "Binary Time", 
+    "uuid": "3ddc5ba8-09d8-4f37-bc40-5930ba1fced1", 
+    "appKeys": {
+        "TRUE_COLOR": 10010, 
+        "BLUETOOTH_VIBRATE": 10003, 
+        "TIME_DECO": 10028, 
+        "TRUE_BORDER": 10030, 
+        "DISPLAY_SECONDS": 10005, 
+        "DATE_TRUE_COLOR": 10018, 
+        "SHOW_DATE": 10021, 
+        "TIME_HINT": 10017, 
+        "FALSE_BORDER": 10031, 
+        "DATE_POS": 10022, 
+        "TIME_FORMAT": 10016, 
+        "FALSE_COLOR": 10011, 
+        "TIME_ALIGNMENT": 10015, 
+        "DATE_HINT": 10025, 
+        "TAPPING_EFFECT_TIMEOUT": 10007, 
+        "VIBRATE_HOURLY": 10004, 
+        "TRUE_BINARY": 10008, 
+        "BLUETOOTH_ICON": 10002, 
+        "HINT_COLOR": 10014, 
+        "DATE_FORMAT": 10024, 
+        "DATE_ALIGNMENT": 10023, 
+        "DISPLAY_IMPOSSIBLE": 10013, 
+        "DATE_HINT_COLOR": 10020, 
+        "BLUETOOTH_RECONNECT_VIBRATE": 10026, 
+        "QUICK_VIEW_MODE": 10033, 
+        "DATE_FALSE_COLOR": 10019, 
+        "NO_VIBE_CHARGING": 10027, 
+        "SHOW_SECONDS_INTERVAL": 10032, 
+        "BATTERY_ICON": 10000, 
+        "DATE_DECO": 10029, 
+        "BATTERY_VIBRATE": 10001, 
+        "READY": 10006, 
+        "DISPLAY_FALSE": 10012, 
+        "BACKGROUND_COLOR": 10009
+    }, 
+    "capabilities": [
+        "configurable"
+    ], 
+    "watchapp": {
+        "watchface": true
+    }, 
+    "resources": {
+        "media": [
+            {
+                "characterRegex": "[0-9.:/]", 
+                "targetPlatforms": null, 
+                "type": "font", 
+                "name": "FONT_PEBBLE_SQUARE_14", 
+                "file": "fonts/pebble_square.otf"
+            }, 
+            {
+                "characterRegex": "[0-9.:/]", 
+                "targetPlatforms": null, 
+                "type": "font", 
+                "name": "FONT_PEBBLE_SQUARE_18", 
+                "file": "fonts/pebble_square.otf"
+            }, 
+            {
+                "menuIcon": true, 
+                "type": "bitmap", 
+                "targetPlatforms": null, 
+                "file": "icon.png", 
+                "name": "icon"
+            }
+        ]
+    }
+}

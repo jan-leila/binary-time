@@ -1,0 +1,4 @@
+.probe/
+.direnv/
+build/
+.lock-waf*

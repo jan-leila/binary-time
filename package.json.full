@@ -1,0 +1,94 @@
+{
+  "name": "Binary Time",
+  "author": "lambda",
+  "version": "2.5.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "Binary Time",
+    "uuid": "3ddc5ba8-09d8-4f37-bc40-5930ba1fced1",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite",
+      "emery"
+    ],
+    "watchapp": {
+      "watchface": true
+    },
+    "messageKeys": [
+      "BACKGROUND_COLOR",
+      "BATTERY_ICON",
+      "BATTERY_VIBRATE",
+      "BLUETOOTH_ICON",
+      "BLUETOOTH_RECONNECT_VIBRATE",
+      "BLUETOOTH_VIBRATE",
+      "DATE_ALIGNMENT",
+      "DATE_DECO",
+      "DATE_FALSE_COLOR",
+      "DATE_FORMAT",
+      "DATE_HINT",
+      "DATE_HINT_COLOR",
+      "DATE_POS",
+      "DATE_TRUE_COLOR",
+      "DISPLAY_FALSE",
+      "DISPLAY_IMPOSSIBLE",
+      "DISPLAY_SECONDS",
+      "FALSE_BORDER",
+      "FALSE_COLOR",
+      "HINT_COLOR",
+      "NO_VIBE_CHARGING",
+      "QUICK_VIEW_MODE",
+      "READY",
+      "SHOW_DATE",
+      "SHOW_SECONDS_INTERVAL",
+      "TAPPING_EFFECT_TIMEOUT",
+      "TIME_ALIGNMENT",
+      "TIME_DECO",
+      "TIME_FORMAT",
+      "TIME_HINT",
+      "TRUE_BINARY",
+      "TRUE_BORDER",
+      "TRUE_COLOR",
+      "VIBRATE_HOURLY"
+    ],
+    "capabilities": [
+      "configurable"
+    ],
+    "resources": {
+      "media": [
+        {
+          "type": "raw",
+          "name": "FONT_PEBBLE_SQUARE_HINT",
+          "file": "pebble_square_14.pfo",
+          "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite"
+          ]
+        },
+        {
+          "type": "raw",
+          "name": "FONT_PEBBLE_SQUARE_HINT",
+          "file": "pebble_square_18.pfo",
+          "targetPlatforms": [
+            "emery"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "IMAGE_MENU_ICON",
+          "file": "icon.png",
+          "menuIcon": true
+        }
+      ]
+    }
+  }
+}
