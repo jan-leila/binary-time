@@ -7,7 +7,8 @@ pebble.pebbleEnv {
   emulatorTarget = "basalt";
   # sdl3: pebble-qemu needs it to start the emulator.
   # gcc: waf's configure step wants a host compiler (the ARM one is found separately).
-  packages = [ pkgs.sdl3 pkgs.gcc ];
+  # chromium: headless settings-page tests and screenshots (tools/settings-screenshots.js).
+  packages = [ pkgs.sdl3 pkgs.gcc pkgs.chromium ];
   # Newer SDKs need pebble-tool >= 5.1, which the pinned pebble.nix doesn't have yet.
   shellHook = ''
     unset LD_LIBRARY_PATH

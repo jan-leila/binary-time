@@ -43,3 +43,22 @@ existing ones do not change.
 For screenshots, `SLEEP_SCREEN_TEST=1 pebble build` compiles in a test mode: an AppMessage `SLEEP_TEST`
 (id 10037) with a phase (1 light, 2 deep, 0 off) fakes that sleep phase with fixed readings, instead of
 Pebble Health, and clears the alarm state. Normal builds ignore the key.
+
+## Visual regression tests
+
+Screenshots are compared pixel by pixel with committed baselines (`tools/lib/png-diff.js`, no npm deps).
+A run writes `current/`, plus red-on-grey diff images in `diff/` for anything that changed. It exits non-zero
+when an image differs by more than `--threshold` (fraction of pixels, default 0.001) or is missing.
+After an intended change, rerun with `--update` and commit the new baselines.
+
+| what | command (inside nix-shell) | baselines |
+|---|---|---|
+| watchface in the emulator (18 scenes × 5 platforms) | `tools/screenshots.sh [--update] [--only REGEX] [platform...]` | `test/screenshots/baseline/` |
+| settings page in headless Chromium (7 scenes × 5 platforms) | `node tools/settings-screenshots.js [--update] [--only REGEX] [platform...]` | `test/settings-screenshots/baseline/` |
+| PNG diff library | `node --test test/png-diff.test.js` | |
+
+The watchface scenes send their settings through the real phone path: `pebble emu-app-config` runs with
+`tools/lib/fake-config-browser.js` as the browser, which returns the scene's settings JSON. The scenes also set the
+emulated battery, quick view and tap state, and pin the clock (UTC) right before each shot. Each scene's
+settings are merged over `test/screenshots/base-config.json`. The emulator runs from a private
+`test/screenshots/.state` and is shut down at the end. The settings page runs with `Date` frozen at the same moment.
