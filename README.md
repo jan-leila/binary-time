@@ -43,6 +43,8 @@ existing ones do not change.
 For screenshots, `SLEEP_SCREEN_TEST=1 pebble build` compiles in a test mode: an AppMessage `SLEEP_TEST`
 (id 10037) with a phase (1 light, 2 deep, 0 off) fakes that sleep phase with fixed readings, instead of
 Pebble Health, and clears the alarm state. Normal builds ignore the key.
+tools/screenshots.sh builds that way; its sleep scenes (19-23) cover both phases, an alarm, a snooze, an alarm
+that went off (the watchface is back) and test mode off.
 
 ## Visual regression tests
 
@@ -53,8 +55,8 @@ After an intended change, rerun with `--update` and commit the new baselines.
 
 | what | command (inside nix-shell) | baselines |
 |---|---|---|
-| watchface in the emulator (18 scenes × 5 platforms) | `tools/screenshots.sh [--update] [--only REGEX] [platform...]` | `test/screenshots/baseline/` |
-| settings page in headless Chromium (7 scenes × 5 platforms) | `node tools/settings-screenshots.js [--update] [--only REGEX] [platform...]` | `test/settings-screenshots/baseline/` |
+| watchface in the emulator (23 scenes, 5 of them the sleep screen; 17 on aplite) | `tools/screenshots.sh [--update] [--only REGEX] [platform...]` | `test/screenshots/baseline/` |
+| settings page in headless Chromium (8 scenes × 5 platforms) | `node tools/settings-screenshots.js [--update] [--only REGEX] [platform...]` | `test/settings-screenshots/baseline/` |
 | PNG diff library | `node --test test/png-diff.test.js` | |
 
 The watchface scenes send their settings through the real phone path: `pebble emu-app-config` runs with

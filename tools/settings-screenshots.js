@@ -32,7 +32,7 @@ const BASE = { storage_version: 4, truebinary: 0, displayfalse: 1, showimpossibl
   displayseconds: 1, timealignment: 0, timeformat: 1, showhint: 0, datebitcolor: '00ff55',
   dateoffcolor: '555555', datehintcolor: '00ff55', showdate: 0, dateposition: 0, datealignment: 0,
   dateformat: 0, dateshowhint: 0, btloss: 1, btlossvibration: 3, btreconnectvibration: 3, btlevel: 1,
-  btlevelvibration: 0, vibratehourly: 0, dndwhilecharging: 0, tappingtimeout: 5000, watchtimeformat: 1,
+  btlevelvibration: 0, vibratehourly: 0, vibratehourlyasleep: 0, dndwhilecharging: 0, tappingtimeout: 5000, watchtimeformat: 1,
   timedeco: 0, datedeco: 0, trueborder: 0, falseborder: 0, secint: 1, quickview: 0 };
 
 // name, settings merged over BASE (null = no saved settings: the page's own defaults), optional page action
@@ -46,6 +46,7 @@ const SCENES = [
   ['06-12h-align-deco', { timeformat: 2, displayseconds: 0, timealignment: 1, timedeco: 1, showdate: 1,
     datealignment: 2, datedeco: 1, dateformat: 4 }],
   ['07-tapped', { showhint: 1, showdate: 1, dateshowhint: 1, btlevel: 2 }, 'handleTapping()'],
+  ['08-hourly-vibe-asleep', { vibratehourly: 1, vibratehourlyasleep: 1 }],  // toggle hidden on aplite
 ];
 
 const FREEZE_DATE = `(() => {

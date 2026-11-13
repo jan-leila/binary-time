@@ -73,7 +73,9 @@ trap kill_emulator EXIT
 
 echo "[screenshots] building"
 pebble clean >/dev/null 2>&1  # a stale build/ can miss newly added message keys
-if ! pebble build >"$STATE/build.log" 2>&1; then
+# SLEEP_SCREEN_TEST: lets the sleep scenes fake a sleep phase by AppMessage (src/c/sleep_screen.c);
+# without that message the app behaves exactly like a normal build
+if ! SLEEP_SCREEN_TEST=1 pebble build >"$STATE/build.log" 2>&1; then
   tail -30 "$STATE/build.log" >&2
   echo "[screenshots] pebble build failed (see $STATE/build.log)" >&2
   exit 1
@@ -155,6 +157,19 @@ run_scenes() {
   scene 16-battery-always  '{"btlevel": 4}' 'emu-battery --percent 50'
   if [ "$P" != aplite ]; then
     scene 17-quick-view    '{"quickview": 1, "showdate": 1, "displayseconds": 0}' 'emu-set-timeline-quick-view on'
+  fi
+  if [ "$P" != aplite ]; then  # no Health API on aplite, so no sleep screen
+    # (FIXED_NOW + 2 is the 21:38:00 minute the shots are taken in; alarms are set on whole minutes)
+    # The test build fakes a sleep phase on SLEEP_TEST (10037: 1 light, 2 deep, 0 off), which also clears the
+    # alarm. Alarms are ALARM_TIME (10034, UTC seconds) and ALARM_SNOOZED (10035).
+    local msg="send-app-message --app-uuid 3ddc5ba8-09d8-4f37-bc40-5930ba1fced1 --int"
+    scene 19-sleep-deep        '{}' "$msg 10037=2"
+    scene 20-sleep-light-alarm '{"timeformat": 2}' "$msg 10037=1 10034=$((FIXED_NOW + 2 + 9 * 3600 + 22 * 60))"
+    scene 21-sleep-snooze      '{"backgroundcolor": "ffffff", "bitcolor": "ff0055", "datebitcolor": "0000aa"}' \
+                               "$msg 10037=2 10034=$((FIXED_NOW + 2 + 8 * 60)) 10035=1"
+    # the alarm went off a minute ago: the watchface is back although the wearer still sleeps
+    scene 22-sleep-alarm-rang  '{}' "$msg 10037=2" "emu-set-time --utc $FIXED_NOW" "$msg 10034=$((FIXED_NOW - 60))"
+    scene 23-sleep-off         '{}' "$msg 10037=0"
   fi
   scene 18-tap-hints       '{"showhint": 1, "showdate": 1, "dateshowhint": 1, "btlevel": 2}' 'emu-tap' 'emu-tap'  # tapped twice: a single emulated tap is occasionally lost
 }
