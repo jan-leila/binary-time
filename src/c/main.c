@@ -757,9 +757,14 @@ static void resubscribe_tick(void) {
 }
 
 static void sleep_screen_style(SleepScreenStyle *style) {
-  *style = (SleepScreenStyle){
-    .bg = s.bg, .value = s.on, .label = PBL_IF_COLOR_ELSE(s.d_on, s.on), .hour24 = hour24(),
-  };
+#if defined(PBL_COLOR)
+  *style = (SleepScreenStyle){ .bg = s.bg, .value = s.on, .label = s.d_on, .hour24 = hour24() };
+#else
+  // black & white: the on colour can equal the background (e.g. a white background with any
+  // non-black bit colour), which would leave the text invisible
+  const GColor fg = gcolor_equal(s.bg, GColorBlack) ? GColorWhite : GColorBlack;
+  *style = (SleepScreenStyle){ .bg = s.bg, .value = fg, .label = fg, .hour24 = hour24() };
+#endif
 }
 
 static void sleep_mode_changed(bool active) {
