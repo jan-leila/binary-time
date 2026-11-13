@@ -18,9 +18,10 @@ concurrency:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    # pinned: ubuntu-latest is moving to 26.04; move deliberately once a release has been built there
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Read version
         id: version
@@ -44,7 +45,7 @@ jobs:
 
       - name: Cache Pebble SDK
         if: steps.check.outputs.exists == 'false'
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.local/share/pebble-sdk
           key: pebble-sdk-4.9.169
