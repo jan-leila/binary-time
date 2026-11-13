@@ -6,8 +6,12 @@
 // preview does not show (alerts, quick view) were measured on the original
 // app in the emulator.
 #include <pebble.h>
+#include "sleep_screen.h"
 
 #define PERSIST_KEY 2
+// Settings added later live under their own key, so the stored Settings blob (and with it
+// every existing setting) stays valid across updates.
+#define PERSIST_KEY_HOURLY_ASLEEP 4
 
 // Tunables measured against the original app.
 #define HINT_Y_FUDGE (LARGE_SCREEN ? -5 : -4)
@@ -49,6 +53,7 @@ typedef struct {
 } Settings;
 
 static Settings s;
+static uint8_t s_hourly_vibe_asleep;  // keep the hourly vibration while the sleep screen is up
 
 static void tick_handler(struct tm *t, TimeUnits changed);
 static void layout_changed(void) {}
@@ -689,6 +694,7 @@ static void draw_bluetooth(GContext *ctx, GRect b) {
 
 static void canvas_update(Layer *layer, GContext *ctx) {
   GRect b = layer_get_bounds(layer);
+  if (sleep_screen_active()) return;  // covered by the sleep screen layer
   Digits d;
   digits_update(&d);
   Layout L;
@@ -746,7 +752,19 @@ static void canvas_update(Layer *layer, GContext *ctx) {
 
 static void resubscribe_tick(void) {
   tick_timer_service_unsubscribe();
-  tick_timer_service_subscribe(s.seconds ? SECOND_UNIT : MINUTE_UNIT, tick_handler);
+  // the sleep screen only changes once a minute
+  tick_timer_service_subscribe(s.seconds && !sleep_screen_active() ? SECOND_UNIT : MINUTE_UNIT, tick_handler);
+}
+
+static void sleep_screen_style(SleepScreenStyle *style) {
+  *style = (SleepScreenStyle){
+    .bg = s.bg, .value = s.on, .label = PBL_IF_COLOR_ELSE(s.d_on, s.on), .hour24 = hour24(),
+  };
+}
+
+static void sleep_mode_changed(bool active) {
+  resubscribe_tick();
+  layer_mark_dirty(s_canvas);
 }
 
 static void tap_timeout_cb(void *data) {
@@ -773,7 +791,8 @@ static void tick_handler(struct tm *t, TimeUnits changed) {
   int old_shown = displayed_seconds();
   bool hour_changed = (t->tm_hour != s_tm.tm_hour);
   s_tm = *t;
-  if (hour_changed && t->tm_min == 0) vibrate(s.hourly_vibe);
+  if (changed & MINUTE_UNIT) sleep_screen_minute_tick();
+  if (hour_changed && t->tm_min == 0 && (s_hourly_vibe_asleep || !sleep_screen_active())) vibrate(s.hourly_vibe);
   // seconds update only when the displayed value changes (see SHOW_SECONDS_INTERVAL)
   if ((changed & MINUTE_UNIT) || !s.seconds || displayed_seconds() != old_shown)
     layer_mark_dirty(s_canvas);
@@ -843,6 +862,7 @@ static void inbox_received(DictionaryIterator *it, void *ctx) {
   if (dict_find(it, MESSAGE_KEY_READY)) {
     send_time_format();
   }
+  sleep_screen_inbox(it);
   if (!dict_find(it, MESSAGE_KEY_TRUE_BINARY)) return;  // not a configuration message
 
   U8(TRUE_BINARY, true_binary); U8(DISPLAY_FALSE, display_false); U8(DISPLAY_IMPOSSIBLE, show_impossible);
@@ -858,11 +878,13 @@ static void inbox_received(DictionaryIterator *it, void *ctx) {
   U8(VIBRATE_HOURLY, hourly_vibe); U8(NO_VIBE_CHARGING, no_vibe_charging);
   U8(QUICK_VIEW_MODE, quick_view);
   if ((t = dict_find(it, MESSAGE_KEY_TAPPING_EFFECT_TIMEOUT))) s.tap_timeout_ms = (uint16_t)t->value->int32;
+  if ((t = dict_find(it, MESSAGE_KEY_VIBRATE_HOURLY_ASLEEP))) s_hourly_vibe_asleep = t->value->int32 ? 1 : 0;
   if (s.sec_interval == 0) s.sec_interval = 1;
   if (s.date_format > 4) s.date_format = 0;
   if (s.display_false > DF_OUTLINE) s.display_false = DF_SOLID;
 
   persist_write_data(PERSIST_KEY, &s, sizeof s);
+  persist_write_int(PERSIST_KEY_HOURLY_ASLEEP, s_hourly_vibe_asleep);
   resubscribe_tick();
   update_tap_subscription();
   layout_changed();
@@ -890,6 +912,7 @@ static void init(void) {
   settings_defaults();
   if (persist_exists(PERSIST_KEY) && persist_get_size(PERSIST_KEY) == (int)sizeof s)
     persist_read_data(PERSIST_KEY, &s, sizeof s);
+  s_hourly_vibe_asleep = persist_read_int(PERSIST_KEY_HOURLY_ASLEEP) ? 1 : 0;  // 0 when never set
   s_hour24 = clock_is_24h_style();
 
   s_hint_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PEBBLE_SQUARE_HINT));
@@ -905,6 +928,7 @@ static void init(void) {
   window_set_window_handlers(s_window, (WindowHandlers){ .load = window_load, .unload = window_unload });
   window_stack_push(s_window, true);
   bt_handler(s_bt_connected);
+  sleep_screen_init(window_get_root_layer(s_window), sleep_screen_style, sleep_mode_changed);
 
   resubscribe_tick();
   update_tap_subscription();
@@ -919,6 +943,7 @@ static void init(void) {
 }
 
 static void deinit(void) {
+  sleep_screen_deinit();
 #if !defined(PBL_PLATFORM_APLITE)
   unobstructed_area_service_unsubscribe();
 #endif

@@ -56,10 +56,14 @@
       "TRUE_BINARY",
       "TRUE_BORDER",
       "TRUE_COLOR",
-      "VIBRATE_HOURLY"
+      "VIBRATE_HOURLY",
+      "ALARM_TIME",
+      "ALARM_SNOOZED",
+      "VIBRATE_HOURLY_ASLEEP"
     ],
     "capabilities": [
-      "configurable"
+      "configurable",
+      "health"
     ],
     "resources": {
       "media": [
@@ -87,6 +91,26 @@
           "name": "IMAGE_MENU_ICON",
           "file": "icon.png",
           "menuIcon": true
+        },
+        {
+          "type": "font",
+          "name": "FONT_TUI_12",
+          "file": "fonts/DejaVuSansMono-Bold.ttf",
+          "characterRegex": "[ -~]",
+          "targetPlatforms": [
+            "basalt",
+            "chalk",
+            "diorite"
+          ]
+        },
+        {
+          "type": "font",
+          "name": "FONT_TUI_16",
+          "file": "fonts/DejaVuSansMono-Bold.ttf",
+          "characterRegex": "[ -~]",
+          "targetPlatforms": [
+            "emery"
+          ]
         }
       ]
     }

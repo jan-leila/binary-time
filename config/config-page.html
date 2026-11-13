@@ -38,6 +38,7 @@
 				btlevel: 1,
 				btlevelvibration: 0,
 				vibratehourly: 0,
+				vibratehourlyasleep: 0,
 				dndwhilecharging: 0,
 				tappingtimeout: 5000,
 				watchtimeformat: 1,
@@ -186,6 +187,7 @@
 				document.getElementById("batteryalert").selectedIndex = getValue(current_config.btlevel, default_config.btlevel);
 				document.getElementById("batteryvibe").selectedIndex = getValue(current_config.btlevelvibration, default_config.btlevelvibration);
 				document.getElementById("hourlyvibe").selectedIndex = getValue(current_config.vibratehourly, default_config.vibratehourly);
+				document.getElementById("hourlyvibeasleep").checked = getValue(current_config.vibratehourlyasleep, default_config.vibratehourlyasleep);
 				document.getElementById("dndwhilecharging").checked = getValue(current_config.dndwhilecharging, default_config.dndwhilecharging);
 
 				document.getElementById("tappingtimeout").value = getValue(current_config.tappingtimeout, default_config.tappingtimeout) / 1000;
@@ -374,6 +376,10 @@
 				} else {
 					document.getElementById("timelinequickviewreactionitem").removeAttribute("hidden");
 				}
+				// sleep detection needs Pebble Health, which aplite does not have
+				// (.item sets display, which would override the hidden attribute)
+				document.getElementById("hourlyvibeasleepitem").style.display =
+					"aplite" === current_watch.platform ? "none" : "";
 				checkTrueBorder();
 			}
 
@@ -501,6 +507,7 @@
 						btlevel: document.getElementById("batteryalert").selectedIndex,
 						btlevelvibration: document.getElementById("batteryvibe").selectedIndex,
 						vibratehourly: document.getElementById("hourlyvibe").selectedIndex,
+						vibratehourlyasleep: document.getElementById("hourlyvibeasleep").checked ? 1 : 0,
 						dndwhilecharging: document.getElementById("dndwhilecharging").checked ? 1 : 0,
 						tappingtimeout: document.getElementById("tappingtimeout").value * 1000,
 						watchtimeformat: current_config.watchtimeformat, // just mirror it back to the watch
@@ -1919,6 +1926,10 @@
 						<option class="item-select-option">Heartbeat</option>
 						<option class="item-select-option">Halfbeat</option>
 					</select>
+				</label>
+				<label class="item" id="hourlyvibeasleepitem">
+					Hourly vibration while asleep
+					<input type="checkbox" class="item-toggle" id="hourlyvibeasleep" name="hourlyvibeasleep">
 				</label>
 				<label class="item">
 					No vibration while charging

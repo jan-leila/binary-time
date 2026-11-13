@@ -1,0 +1,8 @@
+DejaVuSansMono-Bold.ttf is from DejaVu Fonts 2.37 (https://dejavu-fonts.github.io/).
+
+Fonts are (c) Bitstream (see below). DejaVu changes are in public domain.
+Copyright (c) 2003 by Bitstream, Inc. All Rights Reserved. Bitstream Vera is a trademark of
+Bitstream, Inc.
+
+Distributed under the Bitstream Vera Fonts license with DejaVu changes in the public domain;
+full text: https://dejavu-fonts.github.io/License.html
