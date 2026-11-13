@@ -16,6 +16,9 @@ def build(ctx):
     cached_env = ctx.env
     for p in ctx.env.TARGET_PLATFORMS:
         ctx.set_env(ctx.all_envs[p])
+        if os.environ.get('SLEEP_SCREEN_TEST') == '1':
+            # test-only hook for screenshots, see src/c/sleep_screen.c
+            ctx.env.append_value('DEFINES', ['SLEEP_SCREEN_TEST'])
         ctx.set_group(ctx.env.PLATFORM_NAME)
         app_elf = '{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
         ctx.pbl_build(source=ctx.path.ant_glob('src/c/**/*.c'), target=app_elf, bin_type='app')

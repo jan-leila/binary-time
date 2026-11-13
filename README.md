@@ -39,3 +39,7 @@ When the alarm time is reached the watchface comes back. A snooze (`ALARM_SNOOZE
 brings the sleep screen back; any other new alarm does not, so pushing tomorrow's alarm right after
 dismissing today's keeps the watchface up. The new keys are appended to `messageKeys` so the ids of the
 existing ones do not change.
+
+For screenshots, `SLEEP_SCREEN_TEST=1 pebble build` compiles in a test mode: an AppMessage `SLEEP_TEST`
+(id 10037) with a phase (1 light, 2 deep, 0 off) fakes that sleep phase with fixed readings, instead of
+Pebble Health, and clears the alarm state. Normal builds ignore the key.

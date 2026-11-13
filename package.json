@@ -59,7 +59,8 @@
       "VIBRATE_HOURLY",
       "ALARM_TIME",
       "ALARM_SNOOZED",
-      "VIBRATE_HOURLY_ASLEEP"
+      "VIBRATE_HOURLY_ASLEEP",
+      "SLEEP_TEST"
     ],
     "capabilities": [
       "configurable",

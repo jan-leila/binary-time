@@ -61,6 +61,25 @@ static SleepPhase phase_from_activities(HealthActivityMask current) {
 }
 
 // ---------------------------------------------------------------------------
+// Test mode
+// ---------------------------------------------------------------------------
+
+// Built with SLEEP_SCREEN_TEST=1 (see wscript) the screen can be driven by a SLEEP_TEST
+// AppMessage instead of Pebble Health, which the emulator cannot put to sleep. The value is the
+// phase to fake (0 = awake); every such message also clears the alarm state, so screenshot
+// scenes start from the same point. Readings are fixed (see test_info) so screenshots are stable.
+#if defined(SLEEP_SCREEN_TEST)
+static int s_test_phase = -1;  // -1: use Pebble Health
+#endif
+
+static SleepPhase current_phase(void) {
+#if defined(SLEEP_SCREEN_TEST)
+  if (s_test_phase >= 0) return (SleepPhase)s_test_phase;
+#endif
+  return phase_from_activities(health_service_peek_current_activities());
+}
+
+// ---------------------------------------------------------------------------
 // State
 // ---------------------------------------------------------------------------
 
@@ -184,6 +203,9 @@ static int hr_aggregate(time_t from, time_t to, HealthAggregation agg) {
 
 static void refresh_heart_rate(time_t now) {
   SleepInfo *i = &s_info;
+#if defined(SLEEP_SCREEN_TEST)
+  if (s_test_phase >= 0) return;  // keep the fixed readings
+#endif
   i->hr_supported = hr_supported(now);
   i->hr = i->hr_min = i->hr_max = 0;
   if (!i->hr_supported) return;
@@ -194,10 +216,37 @@ static void refresh_heart_rate(time_t now) {
   }
 }
 
+#if defined(SLEEP_SCREEN_TEST)
+static void test_info(time_t now) {
+  const time_t minute = now - now % SECONDS_PER_MINUTE;
+  s_info = (SleepInfo){
+    .phase = current_phase(),
+    .night_start = minute - (2 * SECONDS_PER_HOUR + 14 * SECONDS_PER_MINUTE),
+    .slept = 2 * SECONDS_PER_HOUR + 3 * SECONDS_PER_MINUTE,
+    .wakes = 1,
+    .typical = 7 * SECONDS_PER_HOUR + 40 * SECONDS_PER_MINUTE,
+    .move = 2,
+    .hr_supported = HR_SENSOR_POSSIBLE,
+    .hr = 54, .hr_min = 48, .hr_max = 61,
+  };
+  for (int p = 0; p < SLEEP_PHASE_COUNT; p++) {
+    if (!PHASES[p].summary || !PHASES[p].activity) continue;
+    s_info.phase_time[p] = 52 * SECONDS_PER_MINUTE;
+    s_info.phase_count[p] = 2;
+  }
+}
+#endif
+
 static void refresh_info(void) {
   const time_t now = time(NULL);
   SleepInfo *i = &s_info;
-  i->phase = phase_from_activities(health_service_peek_current_activities());
+#if defined(SLEEP_SCREEN_TEST)
+  if (s_test_phase >= 0) {
+    test_info(now);
+    return;
+  }
+#endif
+  i->phase = current_phase();
 
   NightScan night = { .now = now };
   health_service_activities_iterate(HealthActivitySleep, now - NIGHT_LOOKBACK, now,
@@ -250,7 +299,7 @@ static void update_mode(void) {
 }
 
 static void read_sleep_state(void) {
-  const bool asleep = phase_from_activities(health_service_peek_current_activities()) != SLEEP_PHASE_AWAKE;
+  const bool asleep = current_phase() != SLEEP_PHASE_AWAKE;
   if (asleep && !s_asleep) s_asleep_seen = time(NULL);
   if (!asleep) {
     s_asleep_seen = 0;
@@ -308,6 +357,19 @@ static int32_t tuple_int(const Tuple *t) {
 }
 
 void sleep_screen_inbox(DictionaryIterator *it) {
+#if defined(SLEEP_SCREEN_TEST)
+  Tuple *test = dict_find(it, MESSAGE_KEY_SLEEP_TEST);
+  if (test) {
+    const int32_t phase = tuple_int(test);
+    s_test_phase = (phase > 0 && phase < SLEEP_PHASE_COUNT) ? phase : SLEEP_PHASE_AWAKE;
+    s_alarm = (AlarmState){ 0 };
+    alarm_save();
+    read_sleep_state();
+    update_mode();
+    if (s_active) refresh_info();
+    layer_mark_dirty(s_layer);
+  }
+#endif
   Tuple *t = dict_find(it, MESSAGE_KEY_ALARM_TIME);
   if (!t) return;
   const int32_t when = tuple_int(t);
