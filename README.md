@@ -12,6 +12,12 @@ pebble build                    # -> build/<directory-name>.pbw (aplite basalt c
 pebble install --emulator basalt
 ```
 
+## Icon
+
+The icon is the watchface's dot grid reading 12:34, drawn by `node tools/make-icons.js`: the 25×25 menu icon
+(`resources/icon.png`, plus `icon~bw.png` for aplite and diorite) and the store icons in `store/` (48 and 144 px).
+Edit the script and rerun it rather than editing the PNGs.
+
 ## Sleep screen
 
 While Pebble Health reports the wearer asleep, the watchface is replaced by a terminal-style panel for the
