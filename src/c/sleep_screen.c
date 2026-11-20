@@ -108,6 +108,7 @@ static SleepScreenModeHandler s_on_mode_change;
 static GFont s_font;
 static bool s_asleep;
 static bool s_active;
+static bool s_suspended;      // on the charger: no Health readings at all
 static time_t s_asleep_seen;  // when this app first saw the current sleep
 static AlarmState s_alarm;
 static SleepInfo s_info;
@@ -290,7 +291,7 @@ static void refresh_info(void) {
 // ---------------------------------------------------------------------------
 
 static void update_mode(void) {
-  const bool active = s_asleep && !s_alarm.woke;
+  const bool active = s_asleep && !s_alarm.woke && !s_suspended;
   if (active == s_active) return;
   s_active = active;
   if (active) refresh_info();
@@ -321,6 +322,7 @@ static void alarm_check(time_t now) {
 }
 
 static void health_handler(HealthEventType event, void *context) {
+  if (s_suspended) return;
   switch (event) {
     case HealthEventSignificantUpdate:
     case HealthEventSleepUpdate:
@@ -339,6 +341,7 @@ static void health_handler(HealthEventType event, void *context) {
 
 void sleep_screen_minute_tick(void) {
   alarm_check(time(NULL));
+  if (s_suspended) return;
   read_sleep_state();
   update_mode();
   if (s_active) {
@@ -364,7 +367,7 @@ void sleep_screen_inbox(DictionaryIterator *it) {
     s_test_phase = (phase > 0 && phase < SLEEP_PHASE_COUNT) ? phase : SLEEP_PHASE_AWAKE;
     s_alarm = (AlarmState){ 0 };
     alarm_save();
-    read_sleep_state();
+    if (!s_suspended) read_sleep_state();
     update_mode();
     if (s_active) refresh_info();
     layer_mark_dirty(s_layer);
@@ -588,7 +591,23 @@ static void layer_update(Layer *layer, GContext *ctx) {
 
 bool sleep_screen_active(void) { return s_active; }
 
-void sleep_screen_init(Layer *parent, SleepScreenStyleProvider style, SleepScreenModeHandler on_mode_change) {
+void sleep_screen_set_suspended(bool suspended) {
+  if (suspended == s_suspended) return;
+  s_suspended = suspended;
+  if (suspended) {
+    health_service_events_unsubscribe();
+    s_asleep = false;  // re-read when resumed
+    s_asleep_seen = 0;
+  } else {
+    read_sleep_state();
+    health_service_events_subscribe(health_handler, NULL);
+  }
+  update_mode();
+}
+
+void sleep_screen_init(Layer *parent, SleepScreenStyleProvider style, SleepScreenModeHandler on_mode_change,
+                       bool suspended) {
+  s_suspended = suspended;
   s_style = style;
   s_layer = layer_create(layer_get_bounds(parent));
   layer_set_update_proc(s_layer, layer_update);
@@ -597,12 +616,12 @@ void sleep_screen_init(Layer *parent, SleepScreenStyleProvider style, SleepScree
   s_font = fonts_load_custom_font(resource_get_handle(TUI_FONT));
   if (persist_exists(PERSIST_KEY_ALARM) && persist_get_size(PERSIST_KEY_ALARM) == (int)sizeof s_alarm)
     persist_read_data(PERSIST_KEY_ALARM, &s_alarm, sizeof s_alarm);
-  read_sleep_state();
+  if (!s_suspended) read_sleep_state();
   alarm_check(time(NULL));
   // the handler (if any) runs after the state above is set up
   s_on_mode_change = on_mode_change;
   update_mode();
-  health_service_events_subscribe(health_handler, NULL);
+  if (!s_suspended) health_service_events_subscribe(health_handler, NULL);
 }
 
 void sleep_screen_deinit(void) {

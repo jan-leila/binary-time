@@ -19,9 +19,14 @@ typedef void (*SleepScreenModeHandler)(bool active);
 #if defined(PBL_HEALTH)
 
 // Adds the screen as a layer on top of `parent`'s children; it stays hidden while awake.
-void sleep_screen_init(Layer *parent, SleepScreenStyleProvider style, SleepScreenModeHandler on_mode_change);
+// `suspended`: see sleep_screen_set_suspended.
+void sleep_screen_init(Layer *parent, SleepScreenStyleProvider style, SleepScreenModeHandler on_mode_change,
+                       bool suspended);
 void sleep_screen_deinit(void);
 bool sleep_screen_active(void);
+// While suspended (e.g. on the charger) the screen stays hidden and neither sleep state nor heart
+// rate is read: the Health event subscription is dropped.
+void sleep_screen_set_suspended(bool suspended);
 // Call on every minute change.
 void sleep_screen_minute_tick(void);
 // Handles the ALARM_TIME / ALARM_SNOOZED keys of an incoming AppMessage.
@@ -30,9 +35,10 @@ void sleep_screen_inbox(DictionaryIterator *it);
 #else  // no Health API (aplite): the watchface is always shown
 
 static inline void sleep_screen_init(Layer *parent, SleepScreenStyleProvider style,
-                                     SleepScreenModeHandler on_mode_change) {}
+                                     SleepScreenModeHandler on_mode_change, bool suspended) {}
 static inline void sleep_screen_deinit(void) {}
 static inline bool sleep_screen_active(void) { return false; }
+static inline void sleep_screen_set_suspended(bool suspended) {}
 static inline void sleep_screen_minute_tick(void) {}
 static inline void sleep_screen_inbox(DictionaryIterator *it) {}
 

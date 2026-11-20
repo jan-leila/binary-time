@@ -60,7 +60,8 @@
       "ALARM_TIME",
       "ALARM_SNOOZED",
       "VIBRATE_HOURLY_ASLEEP",
-      "SLEEP_TEST"
+      "SLEEP_TEST",
+      "CHARGE_TEST"
     ],
     "capabilities": [
       "configurable",

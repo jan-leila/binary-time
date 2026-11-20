@@ -52,6 +52,22 @@ Pebble Health, and clears the alarm state. Normal builds ignore the key.
 tools/screenshots.sh builds that way; its sleep scenes (19-23) cover both phases, an alarm, a snooze, an alarm
 that went off (the watchface is back) and test mode off.
 
+## Charging screen
+
+While the watch is on its charger the watchface is replaced by a charging screen (`src/c/charging_screen.c`, all
+platforms): a ring that fills with the charge, a bolt and the percentage inside it, and below it the time until full
+(the two largest units: `1h 15m`, `12m 30s`, `45s`) and the charging power. While it is shown the sleep screen is
+switched off: the Health event subscription is dropped, so neither sleep state nor heart rate is read.
+
+The battery service only reports the charge in 10 % steps, with no current or voltage, so both readings are
+estimates from when the percentage steps up (over the last three steps; they show `--` until two steps were seen,
+typically 15-25 minutes after plugging in). The power is that rate times the battery's nominal capacity and 3.8 V;
+the capacities are approximate per platform (`BATTERY_MAH`). The estimate survives leaving the watchface for up to
+5 minutes.
+
+In test builds (`SLEEP_SCREEN_TEST=1`) an AppMessage `CHARGE_TEST` (id 10038) sets a fixed rate in % per hour
+(0 = measure it); screenshot scenes 24-26 use it, scene 15 shows the screen before any rate is known.
+
 ## Visual regression tests
 
 Screenshots are compared pixel by pixel with committed baselines (`tools/lib/png-diff.js`, no npm deps).
@@ -61,7 +77,7 @@ After an intended change, rerun with `--update` and commit the new baselines.
 
 | what | command (inside nix-shell) | baselines |
 |---|---|---|
-| watchface in the emulator (23 scenes, 5 of them the sleep screen; 17 on aplite) | `tools/screenshots.sh [--update] [--only REGEX] [platform...]` | `test/screenshots/baseline/` |
+| watchface in the emulator (26 scenes, 5 of them the sleep screen, 4 the charging screen; 20 on aplite) | `tools/screenshots.sh [--update] [--only REGEX] [platform...]` | `test/screenshots/baseline/` |
 | settings page in headless Chromium (8 scenes × 5 platforms) | `node tools/settings-screenshots.js [--update] [--only REGEX] [platform...]` | `test/settings-screenshots/baseline/` |
 | PNG diff library | `node --test test/png-diff.test.js` | |
 

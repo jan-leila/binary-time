@@ -171,6 +171,13 @@ run_scenes() {
     scene 22-sleep-alarm-rang  '{}' "$msg 10037=2" "emu-set-time --utc $FIXED_NOW" "$msg 10034=$((FIXED_NOW - 60))"
     scene 23-sleep-off         '{}' "$msg 10037=0"
   fi
+  # charging screen (15-battery-charge shows it before any rate is known). The test build takes a fixed charging rate
+  # in % per hour from CHARGE_TEST (10038) instead of measuring it; it stays set for the following scenes.
+  local cmsg="send-app-message --app-uuid 3ddc5ba8-09d8-4f37-bc40-5930ba1fced1 --int"
+  scene 24-charging-hours    '{}' 'emu-battery --percent 50 --charging' "$cmsg 10038=40"
+  scene 25-charging-minutes  '{}' 'emu-battery --percent 90 --charging' "$cmsg 10038=40"
+  scene 26-charging-colors   '{"backgroundcolor": "ffffff", "bitcolor": "ff0055"}' 'emu-battery --percent 20 --charging' \
+                             "$cmsg 10038=40"
   scene 18-tap-hints       '{"showhint": 1, "showdate": 1, "dateshowhint": 1, "btlevel": 2}' 'emu-tap' 'emu-tap'  # tapped twice: a single emulated tap is occasionally lost
 }
 
